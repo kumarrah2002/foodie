@@ -39,11 +39,12 @@ def get_restaurants(dietary_restrictions=None, budget=None, miles=None):
     # Extract the relevant data from the Yelp response
     businesses = yelp_data["businesses"]
     restaurants = []
-    exceptions = ["market", "store", "butcher", "shoppe", "liquor"]
+    exceptions = ["market", "store", "grocery", "butcher", "shoppe", "shop", "liquor", "spirits", "beer"]
     for business in businesses: # rewrite exceptions
         for keyword in exceptions:
-            if keyword in business["name"].lower():
-                continue  # ignore businesses with "market" or "store" in their name
+            for item in business["categories"]:
+                if keyword in item['alias'].lower():
+                    continue  # ignore businesses with exception keywords (like "market" or "store") in their name
         name = business["name"]
         rating = business["rating"]
         distance = business["distance"]
@@ -71,6 +72,14 @@ def get_restaurants(dietary_restrictions=None, budget=None, miles=None):
         print()
 
 while True:
+    dist = input("What is your search radius (in miles)? ")
+    dist = int(dist)
+    if(dist > 15 or dist < 0):
+        dist = input("Please input a radius distance of up to 15 miles: ")
+        dist = int(dist)
+    elif (dist is None):
+        dist = input("Enter a radius distance of up to 15 miles: ")
+        dist = int(dist)
     # Prompt the user to enter any dietary restrictions
     dietary_restrictions = input("Enter any dietary restrictions (separated by commas, or leave blank): ")
     dietary_restrictions = [r.strip() for r in dietary_restrictions.split(",")] if dietary_restrictions else None
@@ -80,7 +89,7 @@ while True:
     budget = budget if budget in ["1", "2", "3"] else None
 
     # Call the get_restaurants function with the user's inputs
-    get_restaurants(dietary_restrictions, budget, miles = 2)
+    get_restaurants(dietary_restrictions, budget, dist)
 
 
 

@@ -2,8 +2,13 @@ import requests
 import json
 import random
 import geocoder
+import googlemaps
+
+API_KEY = 'AIzaSyB0bYjUNU5jy8Uh7jbG5yzvvCG-1stFqLQ'
+
 
 def get_restaurants(dietary_restrictions=None, budget=None, miles=None):
+    # Retrieves approximate location using your IP Address
     g = geocoder.ipinfo('me')
     location = str(g.lat) + "," + str(g.lng)
     # Convert radius from miles to meters
@@ -40,7 +45,7 @@ def get_restaurants(dietary_restrictions=None, budget=None, miles=None):
     businesses = yelp_data["businesses"]
     restaurants = []
     exceptions = ["market", "store", "grocery", "butcher", "shoppe", "shop", "liquor", "spirits", "beer"]
-    for business in businesses: # rewrite exceptions
+    for business in businesses:  # rewrite exceptions
         for keyword in exceptions:
             for item in business["categories"]:
                 if keyword in item['alias'].lower():
@@ -62,19 +67,31 @@ def get_restaurants(dietary_restrictions=None, budget=None, miles=None):
     random.shuffle(restaurants)
     top_restaurants = restaurants[:3]
 
+    return restaurants, top_restaurants
+
+def print_info(top_restaurants, miles):
     # Print the top 3 restaurants
     print(f"Here are the top 3 restaurants near you within a {miles} mile radius:")
     for i, restaurant in enumerate(top_restaurants):
-        print(f"{i+1}. {restaurant[0]} - {restaurant[1]} stars")
+        print(f"{i + 1}. {restaurant[0]} - {restaurant[1]} stars")
         print(f"   {restaurant[2]}")
         print(f"   {restaurant[3]}")
         print(f"   Categories: {restaurant[4]}")
         print()
 
+
+def randomize(restaurants):
+    pick = random.choice(restaurants)
+    print(f"{pick[0]} - {pick[1]} stars")
+    print(f"   {pick[2]}")
+    print(f"   {pick[3]}")
+    print(f"   Categories: {pick[4]}")
+    print()
+
 while True:
     dist = input("What is your search radius (in miles)? ")
     dist = int(dist)
-    if(dist > 15 or dist < 0):
+    if (dist > 15 or dist < 0):
         dist = input("Please input a radius distance of up to 15 miles: ")
         dist = int(dist)
     elif (dist is None):
@@ -89,8 +106,13 @@ while True:
     budget = budget if budget in ["1", "2", "3"] else None
 
     # Call the get_restaurants function with the user's inputs
-    get_restaurants(dietary_restrictions, budget, dist)
+    restaurants, top_picks = get_restaurants(dietary_restrictions, budget, dist)
+    print_info(top_picks, dist)
 
-
-
+    rand = input("Would You Like An Option Picked For You? (Y/n) ")
+    if rand == 'Y':
+        randomize(restaurants)
+    cont = input("Would You Like To Continue? (Y/n) ")
+    if cont != 'Y':
+        break
 

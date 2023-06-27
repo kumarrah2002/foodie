@@ -10,11 +10,44 @@ import emoji
 
 API_KEY = 'AIzaSyB0bYjUNU5jy8Uh7jbG5yzvvCG-1stFqLQ'
 
+def get_public_ip_and_location():
+    try:
+        # Send HTTP GET request to a public IP API
+        response = requests.get('https://api.ipify.org?format=json')
+
+        # Check if the request was successful
+        if response.status_code == 200:
+            data = response.json()
+
+            # Extract the public IP address from the response
+            ip_address = data.get('ip')
+
+            # Retrieve location information based on the IP address
+            location_response = requests.get(f'https://ipapi.co/{ip_address}/json')
+            if location_response.status_code == 200:
+                location_data = location_response.json()
+
+                # Extract the relevant location information
+                city = location_data.get('city')
+                region = location_data.get('region')
+                country = location_data.get('country_name')
+                longitude = location_data.get("longitude")
+                latitude = location_data.get("latitude")
+
+                info = [ip_address, latitude, longitude, city, region, country]
+                # Return the public IP address and location information
+                return info
+
+    except requests.RequestException:
+        pass
+
+    # Return None if an error occurred or the data is not available
+    return None, None, None, None
 
 def get_restaurants(dietary_restrictions=None, budget=None, miles=None, location=""):
     # Retrieves approximate location using your IP Address
-    g = geocoder.ipinfo('me')
-    location = str(g.lat) + "," + str(g.lng)
+    info = get_public_ip_and_location()
+    location = str(info[1]) + "," + str(info[2])
     # Convert radius from miles to meters
     if miles is not None and isinstance(miles, int) and int(miles) <= 15:
         radius = int(miles * 1609.34)  # Convert miles to meters
@@ -124,12 +157,12 @@ selection = st.selectbox("Enter your budget: ", list(budget_map))
 budget = budget_map[selection]
 
 #Make map and center around user's location
-g = geocoder.ipinfo('me')
-m = folium.Map(location=[g.lat, g.lng], zoom_start=11)
+info = get_public_ip_and_location()
+m = folium.Map(location=[info[1], info[2]], zoom_start=11)
 
 if st.button("Generate"):
     with st.spinner("Loading..."):
-        folium.Marker(location=[g.lat, g.lng], popup="You").add_to(m)
+        folium.Marker(location=[info[1], info[2]], popup="You").add_to(m)
         restaurants, top_picks = get_restaurants(dietary_restrictions, budget, dist)
         if not top_picks:
             st.error("No restaurants found in the given area. Try new inputs!")
@@ -142,39 +175,4 @@ if st.button("Generate"):
                     ''')
             folium.Marker(location=restaurant[5], popup=restaurant[0], icon=folium.Icon(icon=emoji_marker, color='red')).add_to(m)
         folium_static(m, width=700)
-        
-    
-
-# while True:
-#     dist = input("What is your search radius (in miles)? ")
-#     dist = int(dist)
-#     if (dist > 15 or dist < 0):
-#         dist = input("Please input a radius distance of up to 15 miles: ")
-#         dist = int(dist)
-#     elif (dist is None):
-#         dist = input("Enter a radius distance of up to 15 miles: ")
-#         dist = int(dist)
-#     # Prompt the user to enter any dietary restrictions
-#     dietary_restrictions = input("Enter any dietary restrictions (separated by commas, or leave blank): ")
-#     dietary_restrictions = [r.strip() for r in dietary_restrictions.split(",")] if dietary_restrictions else None
-
-#     # Prompt the user to enter a budget
-#     budget = input("Enter your budget (1 for cheap, 2 for moderate, 3 for expensive, or leave blank): ")
-#     budget = budget if budget in ["1", "2", "3"] else None
-
-#     # Call the get_restaurants function with the user's inputs
-#     restaurants, top_picks = get_restaurants(dietary_restrictions, budget, dist)
-#     print_top(top_picks, dist)
-
-#     rand = input("Would You Like An Option Picked For You? (y/n) ")
-#     while rand.lower() == 'y':
-#         randomize(restaurants, top_picks)
-#         rand = input("Would You Like Another Option Picked For You? (y/n) ")
-#     if rand.lower() != 'y' and rand.lower() != 'n':
-#         rand = input("Please enter 'y' or 'n'")
-#     cont = input("Would You Like To Continue? (y/n) ")
-#     while (cont.lower() != 'y' and cont.lower() != 'n') or (isinstance(cont, str) == False):
-#         cont = input("Please enter 'y' or 'n': ")
-#     if cont.lower() != 'y':
-#         break
 

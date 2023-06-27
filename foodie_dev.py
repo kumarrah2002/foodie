@@ -2,7 +2,6 @@ import requests
 import json
 import random
 import geocoder
-import googlemaps
 
 API_KEY = 'AIzaSyB0bYjUNU5jy8Uh7jbG5yzvvCG-1stFqLQ'
 
@@ -44,12 +43,8 @@ def get_restaurants(dietary_restrictions=None, budget=None, miles=None):
     # Extract the relevant data from the Yelp response
     businesses = yelp_data["businesses"]
     restaurants = []
-    exceptions = ["market", "store", "grocery", "butcher", "shoppe", "shop", "liquor", "spirits", "beer"]
-    for business in businesses:  # rewrite exceptions
-        for keyword in exceptions:
-            for item in business["categories"]:
-                if keyword in item['alias'].lower():
-                    continue  # ignore businesses with exception keywords (like "market" or "store") in their name
+    exceptions = ["market", "store", "grocery", "butcher", "shoppe", "shop", "liquor", "spirits", "beer", "convenience"]
+    for business in businesses: 
         name = business["name"]
         rating = business["rating"]
         distance = business["distance"]
@@ -61,32 +56,40 @@ def get_restaurants(dietary_restrictions=None, budget=None, miles=None):
         address = ", ".join(business["location"]["display_address"])
         phone = business["phone"]
         categories = ",".join([cat["title"] for cat in business["categories"]])
-        restaurants.append((name, rating, address, phone, categories))
+        coordinates = [business["coordinates"]["latitude"], business["coordinates"]["longitude"]]
+        restaurants.append((name, rating, address, phone, categories, coordinates))
 
-    # Randomize the order of the restaurants and return the top 3
-    random.shuffle(restaurants)
-    top_restaurants = restaurants[:3]
+    # Filter the restaurants, Randomize the order of the restaurants, and return the top 3
+    filtered_restaurants = [
+        restaurant for restaurant in restaurants
+        if not any(exception in categories for exception in exceptions)
+    ]
+    random.shuffle(filtered_restaurants)
+    top_restaurants = filtered_restaurants[:3]
 
     return restaurants, top_restaurants
 
-def print_info(top_restaurants, miles):
+def print_info(restaurant):
+    print(f" {restaurant[0]} - {restaurant[1]} stars")
+    print(f"   {restaurant[2]}")
+    print(f"   {restaurant[3]}")
+    print(f"   Categories: {restaurant[4]}")
+    print(f"   {restaurant[5]}")
+    print()
+
+def print_top(top_restaurants, miles):
     # Print the top 3 restaurants
     print(f"Here are the top 3 restaurants near you within a {miles} mile radius:")
     for i, restaurant in enumerate(top_restaurants):
-        print(f"{i + 1}. {restaurant[0]} - {restaurant[1]} stars")
-        print(f"   {restaurant[2]}")
-        print(f"   {restaurant[3]}")
-        print(f"   Categories: {restaurant[4]}")
-        print()
+        print(f"{i + 1}.")
+        print_info(restaurant)
 
 
-def randomize(restaurants):
+def randomize(restaurants, top_restaurants):
     pick = random.choice(restaurants)
-    print(f"{pick[0]} - {pick[1]} stars")
-    print(f"   {pick[2]}")
-    print(f"   {pick[3]}")
-    print(f"   Categories: {pick[4]}")
-    print()
+    while(pick in top_restaurants):
+        continue
+    print_info(pick)
 
 while True:
     dist = input("What is your search radius (in miles)? ")
@@ -107,12 +110,17 @@ while True:
 
     # Call the get_restaurants function with the user's inputs
     restaurants, top_picks = get_restaurants(dietary_restrictions, budget, dist)
-    print_info(top_picks, dist)
+    print_top(top_picks, dist)
 
-    rand = input("Would You Like An Option Picked For You? (Y/n) ")
-    if rand == 'Y':
-        randomize(restaurants)
-    cont = input("Would You Like To Continue? (Y/n) ")
-    if cont != 'Y':
+    rand = input("Would You Like An Option Picked For You? (y/n) ")
+    while rand.lower() == 'y':
+        randomize(restaurants, top_picks)
+        rand = input("Would You Like Another Option Picked For You? (y/n) ")
+    if rand.lower() != 'y' and rand.lower() != 'n':
+        rand = input("Please enter 'y' or 'n'")
+    cont = input("Would You Like To Continue? (y/n) ")
+    while (cont.lower() != 'y' and cont.lower() != 'n') or (isinstance(cont, str) == False):
+        cont = input("Please enter 'y' or 'n': ")
+    if cont.lower() != 'y':
         break
 

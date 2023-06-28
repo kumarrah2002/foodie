@@ -114,6 +114,10 @@ st.markdown("<h3 style='text-align: center;'>Your personalized food guide for ne
 st.write("")  # Empty line
 st.markdown("---")  # Separator line
 st.warning("This is the beta version and is currently under-going testing, so load times may reach up to 30 seconds. Thank you for your patience, we'd love your feedback!")
+st.success(
+    f"Fill out our feedback form [here](https://forms.gle/KRoBE8nj2TZwnUqC9)!")
+st.info(
+    f"Get early access to our demos [here](https://hritishbhargava.wixsite.com/foodie)!")
 st.markdown("---")  # Separator line
 
 # Zip Code

@@ -40,6 +40,10 @@ if response.status_code == 200:
             location = place["geometry"]['location']
             price = place.get("price_level", "N/A")
             categories = place.get("types", [])
+            try:
+                open_or_closed = place['opening_hours']['open_now']
+            except KeyError:
+                open_or_closed = None  # Set a default value, such as False
 
             print(f"Name: {name}")
             print(f"Address: {address}")
@@ -51,8 +55,12 @@ if response.status_code == 200:
             if price == 'N/A':
                 print(f"Price: N/A")
             print(f"Categories: {categories}")
+            if open_or_closed == True:
+                print("Open")
+            elif open_or_closed == False:
+                print("Closed")
             print("-----")
-        # print(places[12])
+        # print(places[3])
 # print(json_data['candidates'][0]['geometry']['location'])
 # print(json_data['candidates'][0]['name'])
 # print(str(json_data['candidates'][0]['rating']) + " stars")

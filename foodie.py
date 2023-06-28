@@ -117,7 +117,7 @@ st.warning("This is the beta version and is currently under-going testing, so lo
 st.success(
     f"Fill out our feedback form [here](https://forms.gle/KRoBE8nj2TZwnUqC9)!")
 st.info(
-    f"Get early access to our demos [here](https://hritishbhargava.wixsite.com/foodie)!")
+    f"Get early access to our upcoming demos [here](https://hritishbhargava.wixsite.com/foodie)!")
 st.markdown("---")  # Separator line
 
 # Zip Code

@@ -1,5 +1,6 @@
 import requests
 import json
+import random
 from functions import join_yelp
 
 # Define the Google Maps API endpoint URL
@@ -46,8 +47,9 @@ if google_response.status_code == 200:
             "Luxury": 4
         }
 
+        random.shuffle(places)
         # Iterate over the places and access their details
-        for i, place in enumerate(places):
+        for i, place in enumerate(places):  # [:5]
             name = place["name"]
             address = place['vicinity']
             google_rating = place.get("rating", "N/A")
@@ -58,8 +60,10 @@ if google_response.status_code == 200:
             try:
                 open_or_closed = place['opening_hours']['open_now']
             except KeyError:
-                open_or_closed = None  # Set a default value, such as False
+                open_or_closed = None  # Set a default value
 
+            if 'bakery' in categories:
+                continue
             # Function contains a list of the location address,
             restaurant = join_yelp(name, location)
 

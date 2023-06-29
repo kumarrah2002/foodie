@@ -7,10 +7,6 @@ import folium
 from streamlit_folium import folium_static
 import emoji
 
-
-API_KEY = 'AIzaSyB0bYjUNU5jy8Uh7jbG5yzvvCG-1stFqLQ'
-
-
 def get_restaurants(zipcode, dietary_restrictions=None, budget=None, miles=None, location=""):
     # Retrieves approximate location using your IP Address
     g = geocoder.arcgis(zipcode)
@@ -115,7 +111,7 @@ st.write("")  # Empty line
 st.markdown("---")  # Separator line
 st.warning("This is the beta version and is currently under-going testing, so load times may reach up to 30 seconds. Thank you for your patience, we'd love your feedback!")
 st.success(
-    f"Fill out our feedback form [here](https://forms.gle/KRoBE8nj2TZwnUqC9)!")
+    f"For a chance at a $50 Amazon Gift Card, fill out our feedback form [here](https://forms.gle/KRoBE8nj2TZwnUqC9)!")
 st.info(
     f"Get early access to our upcoming demos [here](https://hritishbhargava.wixsite.com/foodie)!")
 st.markdown("---")  # Separator line
